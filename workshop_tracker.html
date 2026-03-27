@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>एनएचपीसी हिंदी कार्यशाला रिकॉर्ड प्रबंधन</title>
+  <style>
+    :root {
+      --primary: #0b5cab;
+      --bg: #f4f8fc;
+      --card: #ffffff;
+      --text: #10243e;
+      --muted: #4d5f78;
+      --danger: #b42318;
+      --success: #027a48;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans Devanagari", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .container {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px 30px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(16, 36, 62, 0.08);
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    h1, h2 { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      color: var(--muted);
+      gap: 4px;
+    }
+    input, select, textarea, button {
+      font: inherit;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #c9d6e5;
+    }
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button.secondary { background: #3f5f82; }
+    button.danger { background: var(--danger); }
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border-bottom: 1px solid #e3ebf5;
+      text-align: left;
+      padding: 8px;
+      vertical-align: top;
+    }
+    th { background: #edf4fd; }
+    .message {
+      margin-top: 10px;
+      color: var(--success);
+      font-size: 14px;
+    }
+    .muted { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>एनएचपीसी हिंदी कार्यशाला रिकॉर्ड प्रबंधन</h1>
+      <p class="muted">डेटा ब्राउज़र में सुरक्षित रहेगा (LocalStorage)। CSV फाइल में निर्यात भी कर सकते हैं।</p>
+    </div>
+
+    <div class="card">
+      <h2>नई कार्यशाला प्रविष्टि</h2>
+      <form id="workshopForm">
+        <div class="grid">
+          <label>कार्यशाला स्तर
+            <select id="level" required>
+              <option value="">चुनें</option>
+              <option>विभागीय हिंदी कार्यशाला</option>
+              <option>नराकास हिंदी कार्यशाला</option>
+              <option>ऑनलाइन हिंदी कार्यशाला</option>
+            </select>
+          </label>
+
+          <label>आयोजन इकाई
+            <select id="unit" required>
+              <option value="">चुनें</option>
+              <option>निगम मुख्यालय, फरीदाबाद</option>
+              <option>विभाग (मुख्यालय)</option>
+              <option>नराकास सदस्य कार्यालय</option>
+              <option>परियोजना/पावर स्टेशन</option>
+            </select>
+          </label>
+
+          <label>कार्यालय/विभाग/परियोजना का नाम
+            <input id="office" required placeholder="उदाहरण: मानव संसाधन विभाग" />
+          </label>
+
+          <label>तिथि
+            <input id="date" type="date" required />
+          </label>
+
+          <label>माध्यम
+            <select id="mode" required>
+              <option value="">चुनें</option>
+              <option>ऑफलाइन</option>
+              <option>ऑनलाइन</option>
+              <option>हाइब्रिड</option>
+            </select>
+          </label>
+
+          <label>सत्र विषय
+            <input id="topic" required placeholder="उदाहरण: कार्यालयी हिंदी नोटिंग/ड्राफ्टिंग" />
+          </label>
+
+          <label>प्रशिक्षक/संसाधन व्यक्ति
+            <input id="trainer" placeholder="नाम" />
+          </label>
+
+          <label>प्रतिभागियों की संख्या
+            <input id="participants" type="number" min="0" required />
+          </label>
+        </div>
+
+        <label style="margin-top:10px;">टिप्पणी
+          <textarea id="remarks" rows="3" placeholder="वैकल्पिक"></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="submit">रिकॉर्ड सहेजें</button>
+          <button type="button" class="secondary" id="downloadCsv">CSV डाउनलोड</button>
+          <button type="button" class="danger" id="clearAll">सभी रिकॉर्ड हटाएँ</button>
+        </div>
+        <div class="message" id="message"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>सभी रिकॉर्ड</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>तिथि</th>
+            <th>कार्यशाला स्तर</th>
+            <th>इकाई</th>
+            <th>कार्यालय/विभाग</th>
+            <th>माध्यम</th>
+            <th>विषय</th>
+            <th>प्रशिक्षक</th>
+            <th>प्रतिभागी</th>
+            <th>टिप्पणी</th>
+            <th>क्रिया</th>
+          </tr>
+        </thead>
+        <tbody id="recordsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "nhpc_hindi_workshops";
+    const form = document.getElementById("workshopForm");
+    const recordsBody = document.getElementById("recordsBody");
+    const messageBox = document.getElementById("message");
+
+    const readRecords = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const saveRecords = (records) => localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+
+    const showMessage = (msg) => {
+      messageBox.textContent = msg;
+      setTimeout(() => (messageBox.textContent = ""), 2500);
+    };
+
+    const escapeHtml = (value = "") =>
+      String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+
+    const renderRecords = () => {
+      const records = readRecords();
+      recordsBody.innerHTML = records
+        .map((r, index) => `
+          <tr>
+            <td>${escapeHtml(r.date)}</td>
+            <td>${escapeHtml(r.level)}</td>
+            <td>${escapeHtml(r.unit)}</td>
+            <td>${escapeHtml(r.office)}</td>
+            <td>${escapeHtml(r.mode)}</td>
+            <td>${escapeHtml(r.topic)}</td>
+            <td>${escapeHtml(r.trainer)}</td>
+            <td>${escapeHtml(r.participants)}</td>
+            <td>${escapeHtml(r.remarks)}</td>
+            <td><button data-delete="${index}" class="danger">हटाएँ</button></td>
+          </tr>
+        `)
+        .join("");
+    };
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const record = {
+        level: form.level.value,
+        unit: form.unit.value,
+        office: form.office.value.trim(),
+        date: form.date.value,
+        mode: form.mode.value,
+        topic: form.topic.value.trim(),
+        trainer: form.trainer.value.trim(),
+        participants: form.participants.value,
+        remarks: form.remarks.value.trim(),
+      };
+
+      const records = readRecords();
+      records.push(record);
+      saveRecords(records);
+      renderRecords();
+      form.reset();
+      showMessage("रिकॉर्ड सफलतापूर्वक सहेजा गया।");
+    });
+
+    recordsBody.addEventListener("click", (e) => {
+      const button = e.target.closest("button[data-delete]");
+      if (!button) return;
+      const index = Number(button.dataset.delete);
+      const records = readRecords();
+      records.splice(index, 1);
+      saveRecords(records);
+      renderRecords();
+      showMessage("रिकॉर्ड हटाया गया।");
+    });
+
+    document.getElementById("clearAll").addEventListener("click", () => {
+      if (!confirm("क्या आप सभी रिकॉर्ड हटाना चाहते हैं?")) return;
+      saveRecords([]);
+      renderRecords();
+      showMessage("सभी रिकॉर्ड हटाए गए।");
+    });
+
+    document.getElementById("downloadCsv").addEventListener("click", () => {
+      const records = readRecords();
+      if (!records.length) {
+        showMessage("डाउनलोड के लिए कोई रिकॉर्ड उपलब्ध नहीं है।");
+        return;
+      }
+      const headers = [
+        "तिथि","कार्यशाला स्तर","आयोजन इकाई","कार्यालय/विभाग","माध्यम",
+        "विषय","प्रशिक्षक","प्रतिभागी","टिप्पणी"
+      ];
+      const rows = records.map(r => [
+        r.date,r.level,r.unit,r.office,r.mode,r.topic,r.trainer,r.participants,r.remarks
+      ]);
+
+      const csvText = [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell || "").replaceAll('"', '""')}"`).join(","))
+        .join("\n");
+
+      const blob = new Blob(["\uFEFF" + csvText], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "nhpc_hindi_karyashala_records.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    renderRecords();
+  </script>
+</body>
+</html>
